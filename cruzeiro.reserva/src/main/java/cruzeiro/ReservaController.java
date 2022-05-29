@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import cruzeiro.cabines.CabineBean;
-
 import org.json.JSONObject;
 
 @RestController
