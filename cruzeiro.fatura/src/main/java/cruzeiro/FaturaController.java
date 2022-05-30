@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +27,7 @@ public class FaturaController {
 	FaturaDAO dao;
 	
 	@PostMapping("/fatura")
-	public ResponseEntity<String> emitirFatura(@Valid FaturaBean fatura) {
+	public ResponseEntity<String> emitirFatura(@Valid @RequestBody FaturaBean fatura) {
 		dao.save(fatura);
 		return new ResponseEntity<>(HttpStatus.OK);
 

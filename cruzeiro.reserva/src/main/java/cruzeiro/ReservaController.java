@@ -1,5 +1,6 @@
 package cruzeiro;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,17 +29,18 @@ public class ReservaController {
 	@Autowired
 	ReservaDAO dao;
 
-	private JSONObject getCabines() {
+	@SuppressWarnings("unchecked")
+	private Iterable<CabineBean> getCabines() {
 		String uri = "http://localhost:8081/obter";
 		RestTemplate restTemplate = new RestTemplate();
-		String cabine = restTemplate.getForObject(uri, String.class);
-		JSONObject obj = new JSONObject(cabine);
-		return obj;
+		Iterable<CabineBean> cabines = (Iterable<CabineBean>) restTemplate.getForObject(uri, CabineBean.class);
+		
+		return cabines;	
 
 	}
 
-	private ResponseEntity<Iterable<ReservaBean>> obterReservas() {
-		return new ResponseEntity<Iterable<ReservaBean>>(dao.findAll(), HttpStatus.OK);
+	private Iterable<ReservaBean> obterReservas() {
+		return dao.findAll();
 	}
 
 	// Verificar qual a cabine que comporta o total de pessoas (sempre a menor que
@@ -47,14 +49,39 @@ public class ReservaController {
 	// o end point Cabine);
 
 	@GetMapping("/reserva/{totalPessoas}/{data}")
-	public ResponseEntity<Iterable<ReservaBean>> obterReserva(@PathVariable Integer totalPessoas,
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date data) {
+	public ResponseEntity<String> obterReserva(	
+											@PathVariable Integer totalPessoas,
+											@PathVariable 
+											@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
+											Date data) {
 
-		JSONObject cabines = getCabines();
-		ResponseEntity<Iterable<ReservaBean>> reservas = obterReservas();
+		Iterable<CabineBean> cabines = getCabines();
+		Iterable<ReservaBean> reservas = obterReservas();
 		
+		ArrayList<Integer> reservados = null;		
+		for (ReservaBean reservado : reservas) {
+			reservados.add(reservado.getIdCabine());
+		}
 		
-		return new ResponseEntity<Iterable<ReservaBean>>(dao.findAll(), HttpStatus.OK);
+		CabineBean reservar = null;
+		for (CabineBean cabine : cabines) {
+			if(!reservados.contains(cabine.getIdCabine())) {
+				if(reservar == null || (cabine.getMaxPessoas() < reservar.getMaxPessoas() && cabine.getMaxPessoas() <= totalPessoas)) {
+					reservar = cabine;
+				}
+			}
+		}
+		
+		if(reservar != null) {
+			ReservaBean dadoReserva = new ReservaBean();
+			dadoReserva.setIdReserva(reservar.getIdCabine());
+			dadoReserva.setData(data);
+			dadoReserva.setTotalPessoas(totalPessoas);
+			
+			dao.save(dadoReserva);
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
