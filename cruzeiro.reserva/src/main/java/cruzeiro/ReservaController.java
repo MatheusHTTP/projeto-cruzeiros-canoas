@@ -26,6 +26,8 @@ public class ReservaController {
 
 	@Autowired
 	ReservaDAO dao;
+	
+	@Autowired
 	ReservaProducer producer;
 
 	@GetMapping("/obterCabines")

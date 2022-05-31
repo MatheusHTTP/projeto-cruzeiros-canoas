@@ -29,7 +29,7 @@ public class FaturaController {
 	
 	@PostMapping("/fatura")
 	public ResponseEntity<String> emitirFatura(@Valid @RequestBody ReservaBean reserva) {
-		double preco = getCabine(reserva.getIdCabine());
+		double preco = getCabinePreco(reserva.getIdCabine());
 		
 		FaturaBean fatura = new FaturaBean();
 		fatura.setIdCabine(reserva.getIdCabine());
@@ -47,7 +47,7 @@ public class FaturaController {
 
 	}
 	
-	private double getCabine(int idCabine) {
+	private double getCabinePreco(int idCabine) {
 		String uri = "http://localhost:8081/obter/"+idCabine;
 		RestTemplate restTemplate = new RestTemplate();
 		CabineBean cabine = restTemplate.getForObject(uri, CabineBean.class);
