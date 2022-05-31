@@ -32,8 +32,8 @@ public class FaturaConsumer {
 		log.info("Valor: {}", payload.value());
 		
 		ObjectMapper mapper = new ObjectMapper();
-		FaturaBean fatura = mapper.readValue(payload.value(), FaturaBean.class);
+		ReservaBean reserva = mapper.readValue(payload.value(), ReservaBean.class);
 		
-		ctrl.emitirFatura(fatura);
+		ctrl.emitirFatura(reserva);
 	}
 }

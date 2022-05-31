@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 
 @RestController
@@ -27,7 +28,14 @@ public class FaturaController {
 	FaturaDAO dao;
 	
 	@PostMapping("/fatura")
-	public ResponseEntity<String> emitirFatura(@Valid @RequestBody FaturaBean fatura) {
+	public ResponseEntity<String> emitirFatura(@Valid @RequestBody ReservaBean reserva) {
+		double preco = getCabine(reserva.getIdCabine());
+		
+		FaturaBean fatura = new FaturaBean();
+		fatura.setIdCabine(reserva.getIdCabine());
+		fatura.setDataFatura(reserva.getData());
+		fatura.setTotal(reserva.getTotalPessoas()*preco);
+		
 		dao.save(fatura);
 		return new ResponseEntity<>(HttpStatus.OK);
 
@@ -36,6 +44,15 @@ public class FaturaController {
 	@GetMapping("/obter")
 	public ResponseEntity<Iterable<FaturaBean>> obterFaturas() {
 		return new ResponseEntity<Iterable<FaturaBean>>(dao.findAll(), HttpStatus.OK);
+
+	}
+	
+	private double getCabine(int idCabine) {
+		String uri = "http://localhost:8081/obter/"+idCabine;
+		RestTemplate restTemplate = new RestTemplate();
+		CabineBean cabine = restTemplate.getForObject(uri, CabineBean.class);
+
+		return cabine.getPrecoPessoa();	
 
 	}
 

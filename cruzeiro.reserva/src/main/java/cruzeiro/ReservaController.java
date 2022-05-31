@@ -1,7 +1,7 @@
 package cruzeiro;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import org.json.JSONObject;
-
 @RestController
 public class ReservaController {
 
@@ -28,17 +26,24 @@ public class ReservaController {
 
 	@Autowired
 	ReservaDAO dao;
+	ReservaProducer producer;
 
-	@SuppressWarnings("unchecked")
-	private Iterable<CabineBean> getCabines() {
+	@GetMapping("/obterCabines")
+	private CabineBean[] getCabines() {
 		String uri = "http://localhost:8081/obter";
 		RestTemplate restTemplate = new RestTemplate();
-		Iterable<CabineBean> cabines = (Iterable<CabineBean>) restTemplate.getForObject(uri, CabineBean.class);
+		CabineBean[] cabines = restTemplate.getForObject(uri, CabineBean[].class);
+		//Iterator<CabineBean> cabines = Arrays.stream(response).iterator();
 		
 		return cabines;	
 
 	}
-
+	
+	@GetMapping("/teste")
+	public ResponseEntity<Iterable<ReservaBean>> reservas() {
+		return new ResponseEntity<Iterable<ReservaBean>>(dao.findAll(), HttpStatus.OK);
+	}
+	
 	private Iterable<ReservaBean> obterReservas() {
 		return dao.findAll();
 	}
@@ -51,34 +56,40 @@ public class ReservaController {
 	@GetMapping("/reserva/{totalPessoas}/{data}")
 	public ResponseEntity<String> obterReserva(	
 											@PathVariable Integer totalPessoas,
-											@PathVariable 
-											@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
-											Date data) {
-
-		Iterable<CabineBean> cabines = getCabines();
+											@DateTimeFormat(pattern="yyyy-MM-dd") 
+											@PathVariable LocalDate data) {
+		 
+		CabineBean[] cabines = getCabines();
 		Iterable<ReservaBean> reservas = obterReservas();
 		
-		ArrayList<Integer> reservados = null;		
-		for (ReservaBean reservado : reservas) {
-			reservados.add(reservado.getIdCabine());
-		}
+		ArrayList<Integer> reservados = new ArrayList<Integer>();	
 		
+		for (ReservaBean reservado : reservas) {
+			if(reservado.getData().compareTo(data) == 0) {
+				reservados.add(reservado.getIdCabine());
+			}
+			
+		}
+		System.out.println(reservados.toString());
 		CabineBean reservar = null;
 		for (CabineBean cabine : cabines) {
 			if(!reservados.contains(cabine.getIdCabine())) {
-				if(reservar == null || (cabine.getMaxPessoas() < reservar.getMaxPessoas() && cabine.getMaxPessoas() <= totalPessoas)) {
-					reservar = cabine;
+				if(cabine.getMaxPessoas() >= totalPessoas) {
+					if(reservar == null || cabine.getMaxPessoas() < reservar.getMaxPessoas()) {
+						reservar = cabine;
+					}
 				}
 			}
 		}
 		
 		if(reservar != null) {
 			ReservaBean dadoReserva = new ReservaBean();
-			dadoReserva.setIdReserva(reservar.getIdCabine());
+			dadoReserva.setIdCabine(reservar.getIdCabine());
 			dadoReserva.setData(data);
 			dadoReserva.setTotalPessoas(totalPessoas);
 			
 			dao.save(dadoReserva);
+			producer.enviar(dadoReserva);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);

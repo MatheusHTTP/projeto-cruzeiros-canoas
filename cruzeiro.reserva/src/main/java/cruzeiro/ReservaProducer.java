@@ -12,9 +12,9 @@ public class ReservaProducer {
 	private String topicName;
 	
 	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
+	private KafkaTemplate<String, ReservaBean> kafkaTemplate;
 	
-	public void enviar(String mensagem) {
+	public void enviar(ReservaBean mensagem) {
 		kafkaTemplate.send(topicName, mensagem);
 	}
 }
