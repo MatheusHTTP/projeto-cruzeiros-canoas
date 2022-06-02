@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
 
 @Service
 public class ReservaProducer {
@@ -16,10 +15,8 @@ public class ReservaProducer {
 	@Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
 	
-	public void enviar(ReservaBean reserva) {
-		Gson gson = new Gson();
-		String enviar = gson.toJson(reserva);
+	public void enviar(String reserva) {
 		
-		kafkaTemplate.send(topicName, enviar);
+		kafkaTemplate.send(topicName, reserva);
 	}
 }

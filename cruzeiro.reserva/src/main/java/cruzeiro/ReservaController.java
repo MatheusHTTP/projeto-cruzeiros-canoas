@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -60,12 +61,14 @@ public class ReservaController {
 											@PathVariable Integer totalPessoas,
 											@DateTimeFormat(pattern="yyyy-MM-dd") 
 											@PathVariable LocalDate data) {
-		 
+		
+		System.out.println("---> "+data);
+		
 		CabineBean[] cabines = getCabines();
 		Iterable<ReservaBean> reservas = obterReservas();
 		
 		ArrayList<Integer> reservados = new ArrayList<Integer>();	
-		
+
 		for (ReservaBean reservado : reservas) {
 			if(reservado.getData().compareTo(data) == 0) {
 				reservados.add(reservado.getIdCabine());
@@ -91,7 +94,12 @@ public class ReservaController {
 			dadoReserva.setTotalPessoas(totalPessoas);
 			
 			dao.save(dadoReserva);
-			producer.enviar(dadoReserva);
+			
+			JSONObject jsonObject = new JSONObject(dadoReserva);
+			String msg = jsonObject.toString();
+			
+			System.out.println(msg);
+			producer.enviar(msg);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);

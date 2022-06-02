@@ -1,12 +1,15 @@
 package cruzeiro;
 
-import java.time.LocalDate;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "Reserva")
 public class ReservaBean {
@@ -16,7 +19,8 @@ public class ReservaBean {
 	private int idReserva;
 
 	@NotNull(message = "Informe a data da reserva.")
-	private LocalDate data;
+	@DateTimeFormat(pattern="yyyy-MM-dd") 
+	private Date data;
 
 	@NotNull(message = "Informe o total de pessoas na cabine.")
 	private int totalPessoas;
@@ -28,7 +32,7 @@ public class ReservaBean {
 		super();
 	}
 
-	public ReservaBean(int idCabine, int idReserva, LocalDate data, int totalPessoas) {
+	public ReservaBean(int idCabine, int idReserva, Date data, int totalPessoas) {
 		super();
 		this.idReserva = idReserva;
 		this.idCabine = idCabine;
@@ -44,11 +48,11 @@ public class ReservaBean {
 		this.idReserva = idReserva;
 	}
 
-	public LocalDate getData() {
+	public Date getData() {
 		return data;
 	}
 
-	public void setData(LocalDate data) {
+	public void setData(Date data) {
 		this.data = data;
 	}
 

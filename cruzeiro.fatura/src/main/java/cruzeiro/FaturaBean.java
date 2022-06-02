@@ -1,6 +1,6 @@
 package cruzeiro;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,7 +21,7 @@ public class FaturaBean {
 	private int idCabine;
 	
 	@NotNull (message = "Informe a data de reserva.")
-	private LocalDate dataFatura;
+	private Date dataFatura;
 	
 	@NotNull (message = "Informe o valor total da reserva.")
 	private Double total;
@@ -31,7 +31,7 @@ public class FaturaBean {
 		super();
 	}
 	
-	public FaturaBean(int id, int idCabine, LocalDate dataFatura, double total) {
+	public FaturaBean(int id, int idCabine, Date dataFatura, double total) {
 		super();
 		this.id = id;
 		this.idCabine = idCabine;
@@ -55,11 +55,11 @@ public class FaturaBean {
 		this.idCabine = idCabine;
 	}
 
-	public LocalDate getDataFatura() {
+	public Date getDataFatura() {
 		return dataFatura;
 	}
 
-	public void setDataFatura(LocalDate dataFatura) {
+	public void setDataFatura(Date dataFatura) {
 		this.dataFatura = dataFatura;
 	}
 
